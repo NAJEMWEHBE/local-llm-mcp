@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple.svg)](https://modelcontextprotocol.io)
+[![Glama](https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp/badges/score.svg)](https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp)
 [![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-DXT-orange.svg)](https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-orange.svg)](https://claude.ai/code)
 [![GitHub stars](https://img.shields.io/github/stars/NAJEMWEHBE/local-llm-mcp?style=social)](https://github.com/NAJEMWEHBE/local-llm-mcp/stargazers)
