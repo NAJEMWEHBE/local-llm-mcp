@@ -99,7 +99,10 @@ def local_chat(
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
+            timeout=120.0,
         )
+        if not resp.choices:
+            return "ERROR: model returned an empty choices list"
         return resp.choices[0].message.content or ""
     except Exception as e:
         return f"ERROR: {e}"
@@ -147,7 +150,11 @@ def local_compare(
                 messages=msgs,
                 max_tokens=max_tokens,
                 temperature=0.5,
+                timeout=120.0,
             )
+            if not r.choices:
+                parts.append(f"=== {name} ===\nERROR: model returned an empty choices list")
+                continue
             content = r.choices[0].message.content or ""
             parts.append(f"=== {name} ===\n{content}")
         except Exception as e:

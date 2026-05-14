@@ -44,8 +44,11 @@ jobs:
           print('DXT contents:', names)
           "
 
-      - name: Attach DXT to release
+      - name: Create or update release with DXT asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: local-llm.dxt
+          generate_release_notes: true
+          fail_on_unmatched_files: true
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${GITHUB_REF_NAME}" local-llm.dxt --clobber
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
