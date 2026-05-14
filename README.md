@@ -1,13 +1,19 @@
 # local-llm-mcp
 
-[![Release](https://img.shields.io/github/v/release/NAJEMWEHBE/local-llm-mcp?label=release&color=blue)](https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![MCP](https://img.shields.io/badge/MCP-compatible-purple.svg)](https://modelcontextprotocol.io)
-[![Glama](https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp/badges/score.svg)](https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp)
-[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-DXT-orange.svg)](https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-orange.svg)](https://claude.ai/code)
-[![GitHub stars](https://img.shields.io/github/stars/NAJEMWEHBE/local-llm-mcp?style=social)](https://github.com/NAJEMWEHBE/local-llm-mcp/stargazers)
+<p align="center">
+  <img src="assets/banner.svg" alt="local-llm-mcp — three MCP hosts on the left, a glowing local-llm bridge in the center, four local OSS LLM runtimes on the right, with animated data pulses traveling along the connection lines." width="100%"/>
+</p>
+
+<p align="center">
+  <a href="https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/NAJEMWEHBE/local-llm-mcp?label=release&color=blue" alt="Release"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License: MIT"/></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+"/></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-compatible-purple.svg" alt="MCP"/></a>
+  <a href="https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp"><img src="https://glama.ai/mcp/servers/NAJEMWEHBE/local-llm-mcp/badges/score.svg" alt="Glama"/></a>
+  <a href="https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest"><img src="https://img.shields.io/badge/Claude%20Desktop-DXT-orange.svg" alt="Claude Desktop"/></a>
+  <a href="https://claude.ai/code"><img src="https://img.shields.io/badge/Claude%20Code-supported-orange.svg" alt="Claude Code"/></a>
+  <a href="https://github.com/NAJEMWEHBE/local-llm-mcp/stargazers"><img src="https://img.shields.io/github/stars/NAJEMWEHBE/local-llm-mcp?style=social" alt="GitHub stars"/></a>
+</p>
 
 MCP server that exposes locally-hosted OSS LLMs (Ollama, LM Studio, vLLM, any OpenAI-compatible runtime) as tools for Claude Code, Claude Desktop, and Codex CLI.
 
