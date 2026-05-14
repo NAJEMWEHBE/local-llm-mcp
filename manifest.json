@@ -1,0 +1,54 @@
+{
+  "manifest_version": "0.2",
+  "name": "local-llm",
+  "display_name": "Local OSS LLMs",
+  "version": "0.1.0",
+  "description": "Access locally-hosted OSS LLMs (Ollama, LM Studio, vLLM, any OpenAI-compatible runtime) as MCP tools.",
+  "long_description": "Exposes whatever models the local runtime is serving (read live from /api/tags) via three tools: list_models, local_chat, and local_compare. Pairs well with cloud endpoints for a tiered workflow: small/fast local models for high-frequency mechanical tasks, big cloud models for heavy reasoning. Reads OLLAMA_HOST env var (default http://127.0.0.1:11434) so the same shim works against any OpenAI-compatible local runtime.",
+  "author": {
+    "name": "NAJEMWEHBE",
+    "url": "https://github.com/NAJEMWEHBE"
+  },
+  "homepage": "https://github.com/NAJEMWEHBE/local-llm-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NAJEMWEHBE/local-llm-mcp.git"
+  },
+  "server": {
+    "type": "binary",
+    "entry_point": "server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "${__dirname}",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "OLLAMA_HOST": "${user_config.host}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "list_models", "description": "List locally-installed OSS models served by the local runtime." },
+    { "name": "local_chat", "description": "Single-model completion against any installed local model." },
+    { "name": "local_compare", "description": "Ensemble fan-out across multiple local models for cross-checking." }
+  ],
+  "keywords": ["local", "llm", "oss", "ollama", "lm-studio", "vllm", "ensemble", "openai-compatible"],
+  "license": "MIT",
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["win32", "darwin", "linux"],
+    "runtimes": {}
+  },
+  "user_config": {
+    "host": {
+      "type": "string",
+      "title": "Local runtime host URL",
+      "description": "Base URL of the local OpenAI-compatible runtime (Ollama default: http://127.0.0.1:11434).",
+      "default": "http://127.0.0.1:11434",
+      "required": false
+    }
+  }
+}
