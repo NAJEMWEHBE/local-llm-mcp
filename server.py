@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 """Local OSS LLM MCP server.
 
-Exposes locally-installed OSS models (served by a local OpenAI-compatible
-runtime) as MCP tools that Claude Code / Codex / Copilot can call.
+Exposes locally-installed OSS models (served by any local OpenAI-compatible
+runtime: Ollama, LM Studio, vLLM, llama.cpp server, text-generation-webui,
+or anything else exposing /v1/chat/completions and /api/tags) as MCP tools
+that Claude Code / Claude Desktop / Codex / Copilot can call.
 
-Reads the local host from OLLAMA_HOST (default http://127.0.0.1:11434).
-The OpenAI client is used because the local runtime exposes an
-OpenAI-compatible /v1/chat/completions endpoint.
+Host resolution order:
+    1. LOCAL_LLM_HOST     — preferred, runtime-agnostic name
+    2. OPENAI_BASE_URL    — common in OpenAI-SDK ecosystems
+    3. OLLAMA_HOST        — legacy / Ollama-default name (kept for compat)
+    4. http://127.0.0.1:11434 (Ollama default)
 """
 
 import os
@@ -18,7 +22,12 @@ from openai import OpenAI
 
 mcp = FastMCP("local-llm")
 
-HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+HOST = (
+    os.environ.get("LOCAL_LLM_HOST")
+    or os.environ.get("OPENAI_BASE_URL")
+    or os.environ.get("OLLAMA_HOST")
+    or "http://127.0.0.1:11434"
+).rstrip("/")
 
 # api_key is a placeholder; the local runtime ignores it but the SDK
 # refuses to construct a client without one.

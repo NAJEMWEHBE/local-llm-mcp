@@ -45,7 +45,7 @@ Add to `~/.claude.json` (top level):
         "server.py"
       ],
       "env": {
-        "OLLAMA_HOST": "http://127.0.0.1:11434"
+        "LOCAL_LLM_HOST": "http://127.0.0.1:11434"
       }
     }
   }
@@ -62,16 +62,27 @@ Add to `~/.codex/config.toml`:
 [mcp_servers.local-llm]
 command = "uv"
 args = ["--directory", "/absolute/path/to/local-llm-mcp", "run", "server.py"]
-env = { OLLAMA_HOST = "http://127.0.0.1:11434" }
+env = { LOCAL_LLM_HOST = "http://127.0.0.1:11434" }
 ```
 
 ## Configuration
 
-| Env var | Default | Meaning |
-|---------|---------|---------|
-| `OLLAMA_HOST` | `http://127.0.0.1:11434` | Base URL of the local runtime. Used for both `/api/tags` (model list) and `/v1/chat/completions` (inference). The name is historical — any OpenAI-compatible runtime works. |
+The host URL is resolved in this order (first set wins):
 
-To point at LM Studio: `OLLAMA_HOST=http://127.0.0.1:1234`.
+| Priority | Env var | Notes |
+|---------|---------|-------|
+| 1 | `LOCAL_LLM_HOST` | Preferred. Runtime-agnostic name. |
+| 2 | `OPENAI_BASE_URL` | Common in OpenAI-SDK ecosystems. |
+| 3 | `OLLAMA_HOST` | Legacy / Ollama-default. Kept for backward compatibility. |
+| 4 | `http://127.0.0.1:11434` | Built-in fallback (Ollama default port). |
+
+Examples:
+- Ollama: `LOCAL_LLM_HOST=http://127.0.0.1:11434` (or just leave unset)
+- LM Studio: `LOCAL_LLM_HOST=http://127.0.0.1:1234`
+- vLLM: `LOCAL_LLM_HOST=http://127.0.0.1:8000`
+- Remote box on LAN: `LOCAL_LLM_HOST=http://192.168.1.50:11434`
+
+The server hits two endpoints on the host: `GET /api/tags` (model inventory) and `POST /v1/chat/completions` (inference). Any runtime exposing both works.
 
 ## Smoke test
 
