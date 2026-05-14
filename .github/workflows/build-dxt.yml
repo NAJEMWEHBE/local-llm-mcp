@@ -1,0 +1,51 @@
+name: Build DXT on tag push
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build DXT artifact
+        run: |
+          python -c "
+          import zipfile, pathlib
+          out = pathlib.Path('local-llm.dxt')
+          files = ['manifest.json','server.py','pyproject.toml','README.md']
+          z = zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED)
+          for f in files: z.write(f, arcname=f)
+          z.close()
+          print(f'Built {out} ({out.stat().st_size} bytes)')
+          "
+
+      - name: Verify DXT structure
+        run: |
+          python -c "
+          import zipfile
+          z = zipfile.ZipFile('local-llm.dxt')
+          names = z.namelist()
+          required = {'manifest.json','server.py','pyproject.toml','README.md'}
+          missing = required - set(names)
+          assert not missing, f'Missing in DXT: {missing}'
+          print('DXT contents:', names)
+          "
+
+      - name: Attach DXT to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" local-llm.dxt --clobber

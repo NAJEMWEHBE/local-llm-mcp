@@ -102,17 +102,85 @@ uv run python -c "from server import list_models; print(list_models())"
 
 The first run pulls dependencies into `.venv`. Subsequent runs reuse them.
 
-## Multi-agent example
+## Multi-Agent Leader recipe (Claude + local + cloud)
 
-With both `local-llm-mcp` and a cloud MCP wired, you can build a delegation flow where Claude orchestrates and the local models handle bulk mechanical work:
+This MCP shines when paired with a cloud-model MCP (e.g. [nvidia-models-mcp](https://github.com/NAJEMWEHBE/nvidia-models-mcp)) and a global `CLAUDE.md` that turns Claude into the orchestrator. Total token win: ~300–500 saved per session by not retyping the multi-agent reminder, plus offloaded bulk work to local hardware.
 
-> User: Generate Pydantic models for these 12 JSON schemas.
+### 1. Wire both MCPs
+
+`~/.claude.json` (Claude Code):
+
+```json
+{
+  "mcpServers": {
+    "local-llm": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/local-llm-mcp", "run", "server.py"],
+      "env": { "LOCAL_LLM_HOST": "http://127.0.0.1:11434" }
+    },
+    "nvidia-models": {
+      "command": "uv",
+      "args": ["--directory", "/path/to/nvidia-models-mcp", "run", "server.py"],
+      "env": { "NVIDIA_API_KEY": "nvapi-..." }
+    }
+  }
+}
+```
+
+### 2. Add a tiny global directive — `~/.claude/CLAUDE.md`
+
+```markdown
+# Multi-agent leader
+
+You lead a multi-agent crew. For heavy/bulk work or second opinions, delegate.
+
+Workers:
+- Local (Ollama): qwen3:27b (code), gemma3:8b (prose/review) via
+  `mcp__local-llm__local_chat` and `local_compare`.
+- Cloud (NIM): Qwen, Llama, DeepSeek, Mixtral via
+  `mcp__nvidia-models__nvidia_chat` and `nvidia_compare`.
+
+Never paste worker output blindly — verify against the spec.
+Architecture and security-sensitive work stays with Claude.
+If local is down, fall back to cloud; never silently solo.
+```
+
+### 3. (Optional) Add a Multi-Agent Leader skill
+
+Drop a `~/.claude/skills/multi-agent-leader/SKILL.md` with role split, delegate triggers, and verification rules so the protocol auto-loads only when relevant. Example trigger description:
+
+> Use when the task involves heavy code generation, bulk transforms, doc drafting, verification passes, or the user mentions "multi-agent", "delegate", "use Qwen", "use Gemma", "ensemble", or "second opinion".
+
+### Example flow
+
+> **User:** Generate Pydantic models for these 12 JSON schemas.
 >
-> Claude: Delegating bulk model generation to `qwen3:27b` via `local_chat`. Verifying field types match schemas.
+> **Claude:** Delegating bulk generation to `qwen3:27b` (local). Verifying types after.
 >
-> [Calls `mcp__local-llm__local_chat(model="qwen3:27b", prompt="<schemas + spec>", temperature=0.2)`]
+> [Calls `mcp__local-llm__local_chat(model="qwen3:27b", prompt="<schemas+spec>", temperature=0.2)`]
 >
-> Claude: Qwen wrote 12 models. One missing `Optional` repaired. Writing files.
+> **Claude:** Qwen wrote 12 models. Diffed against schemas — one missing `Optional[int]` repaired. Wrote `models.py`.
+
+### When to delegate (skill rubric)
+
+| Task | Route |
+|------|-------|
+| Code block > ~200 lines | `local_chat(qwen3:27b)` |
+| Bulk repetitive transform (rename, port, generate N tests) | `local_chat(qwen3:27b)` |
+| Doc / docstring / README draft | `local_chat(gemma3:8b)` |
+| Review pass on Claude's output | `nvidia_chat(qwen-coder)` for second opinion |
+| Hard decision (algorithm, API, tricky bug) | `local_compare` or `nvidia_compare` for fan-out |
+| Architecture decision | Claude only |
+| Auth / crypto / payment code | Claude only |
+| Ambiguous spec | Claude clarifies with user first |
+
+### Verification pattern (mandatory)
+
+1. Read worker output.
+2. Diff against the spec / user intent.
+3. Check: drift, hallucinated APIs, wrong style, missing edge cases (null, zero, empty, error paths), incorrect imports.
+4. Repair, escalate, or re-prompt before writing to disk.
+5. Never blind-paste.
 
 ## Building a DXT release
 
