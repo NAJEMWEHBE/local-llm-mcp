@@ -1,5 +1,13 @@
 # local-llm-mcp
 
+[![Release](https://img.shields.io/github/v/release/NAJEMWEHBE/local-llm-mcp?label=release&color=blue)](https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![MCP](https://img.shields.io/badge/MCP-compatible-purple.svg)](https://modelcontextprotocol.io)
+[![Claude Desktop](https://img.shields.io/badge/Claude%20Desktop-DXT-orange.svg)](https://github.com/NAJEMWEHBE/local-llm-mcp/releases/latest)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-orange.svg)](https://claude.ai/code)
+[![GitHub stars](https://img.shields.io/github/stars/NAJEMWEHBE/local-llm-mcp?style=social)](https://github.com/NAJEMWEHBE/local-llm-mcp/stargazers)
+
 MCP server that exposes locally-hosted OSS LLMs (Ollama, LM Studio, vLLM, any OpenAI-compatible runtime) as tools for Claude Code, Claude Desktop, and Codex CLI.
 
 Pairs with cloud-model MCPs like [nvidia-models-mcp](https://github.com/NAJEMWEHBE/nvidia-models-mcp) for tiered workflows: small/fast local models for high-frequency mechanical tasks, big cloud models for heavy reasoning.
