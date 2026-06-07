@@ -11,8 +11,16 @@ Host resolution order:
     2. OPENAI_BASE_URL    — common in OpenAI-SDK ecosystems
     3. OLLAMA_HOST        — legacy / Ollama-default name (kept for compat)
     4. http://127.0.0.1:11434 (Ollama default)
+
+Timeout fix (v0.1.1): per-call request timeout raised 120s -> 300s default
+and made overridable via LOCAL_LLM_TIMEOUT env, so large local models
+stop hitting "Request timed out" on cold VRAM loads. Bad override values
+(empty, non-numeric, zero, negative, inf/nan) fall back to the default
+rather than crashing module import. SDK auto-retries also disabled
+(max_retries=0) — cold-load is deterministic, not transient.
 """
 
+import math
 import os
 import sys
 
@@ -31,7 +39,33 @@ HOST = (
 
 # api_key is a placeholder; the local runtime ignores it but the SDK
 # refuses to construct a client without one.
-client = OpenAI(base_url=f"{HOST}/v1", api_key="local")
+# max_retries=0: cold-load failures are deterministic (VRAM page-in), not
+# transient — silent SDK retries would multiply wall-clock 3x with no benefit.
+client = OpenAI(base_url=f"{HOST}/v1", api_key="local", max_retries=0)
+
+# --- request timeout -------------------------------------------------------
+_DEFAULT_TIMEOUT = 300.0
+_MIN_TIMEOUT = 0.1
+
+
+def _parse_timeout(raw: str | None) -> float:
+    """Parse LOCAL_LLM_TIMEOUT defensively.
+
+    A bad override (empty, non-numeric, zero, negative, inf/nan) must never
+    crash module import — fall back to the safe default instead.
+    """
+    if raw is None or not raw.strip():
+        return _DEFAULT_TIMEOUT
+    try:
+        val = float(raw)
+    except (TypeError, ValueError):
+        return _DEFAULT_TIMEOUT
+    if not math.isfinite(val) or val < _MIN_TIMEOUT:
+        return _DEFAULT_TIMEOUT
+    return val
+
+
+_REQUEST_TIMEOUT = _parse_timeout(os.environ.get("LOCAL_LLM_TIMEOUT"))
 
 
 def _list_local_models() -> list[dict]:
@@ -99,7 +133,7 @@ def local_chat(
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
-            timeout=120.0,
+            timeout=_REQUEST_TIMEOUT,
         )
         if not resp.choices:
             return "ERROR: model returned an empty choices list"
@@ -150,7 +184,7 @@ def local_compare(
                 messages=msgs,
                 max_tokens=max_tokens,
                 temperature=0.5,
-                timeout=120.0,
+                timeout=_REQUEST_TIMEOUT,
             )
             if not r.choices:
                 parts.append(f"=== {name} ===\nERROR: model returned an empty choices list")

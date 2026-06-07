@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "local-llm",
   "display_name": "Local OSS LLMs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Access locally-hosted OSS LLMs (Ollama, LM Studio, vLLM, any OpenAI-compatible runtime) as MCP tools.",
   "long_description": "Exposes whatever models the local runtime is serving (read live from /api/tags) via three tools: list_models, local_chat, and local_compare. Pairs well with cloud endpoints for a tiered workflow: small/fast local models for high-frequency mechanical tasks, big cloud models for heavy reasoning. Resolves the runtime host from LOCAL_LLM_HOST (preferred), OPENAI_BASE_URL, or OLLAMA_HOST, defaulting to http://127.0.0.1:11434 — so the same shim works against Ollama, LM Studio, vLLM, llama.cpp server, or any OpenAI-compatible local runtime.",
   "author": {

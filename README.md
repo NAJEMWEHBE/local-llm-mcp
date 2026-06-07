@@ -99,6 +99,16 @@ Examples:
 
 The server hits two endpoints on the host: `GET /api/tags` (model inventory) and `POST /v1/chat/completions` (inference). Any runtime exposing both works.
 
+### Request timeout
+
+Large local models (27B+ params) can take several minutes to cold-load into VRAM the first time they're called. The per-request timeout defaults to **300 seconds** and can be raised or lowered via `LOCAL_LLM_TIMEOUT` (seconds, float).
+
+| Env var | Default | Notes |
+|---------|---------|-------|
+| `LOCAL_LLM_TIMEOUT` | `300.0` | Per-call timeout for `local_chat` / `local_compare`. Bad values (empty, non-numeric, zero, negative, inf/nan) silently fall back to the default. |
+
+SDK auto-retries are disabled (`max_retries=0`) because cold-load failures are deterministic, not transient — silent retries would multiply wall-clock with no benefit.
+
 ## Smoke test
 
 ```bash
