@@ -60,7 +60,8 @@ Add to `~/.claude.json` (top level):
         "server.py"
       ],
       "env": {
-        "LOCAL_LLM_HOST": "http://127.0.0.1:11434"
+        "LOCAL_LLM_HOST": "http://127.0.0.1:11434",
+        "LOCAL_LLM_TIMEOUT": "300"
       }
     }
   }
@@ -77,7 +78,7 @@ Add to `~/.codex/config.toml`:
 [mcp_servers.local-llm]
 command = "uv"
 args = ["--directory", "/absolute/path/to/local-llm-mcp", "run", "server.py"]
-env = { LOCAL_LLM_HOST = "http://127.0.0.1:11434" }
+env = { LOCAL_LLM_HOST = "http://127.0.0.1:11434", LOCAL_LLM_TIMEOUT = "300" }
 ```
 
 ## Configuration
