@@ -60,7 +60,8 @@ Add to `~/.claude.json` (top level):
         "server.py"
       ],
       "env": {
-        "LOCAL_LLM_HOST": "http://127.0.0.1:11434"
+        "LOCAL_LLM_HOST": "http://127.0.0.1:11434",
+        "LOCAL_LLM_TIMEOUT": "300"
       }
     }
   }
@@ -77,7 +78,7 @@ Add to `~/.codex/config.toml`:
 [mcp_servers.local-llm]
 command = "uv"
 args = ["--directory", "/absolute/path/to/local-llm-mcp", "run", "server.py"]
-env = { LOCAL_LLM_HOST = "http://127.0.0.1:11434" }
+env = { LOCAL_LLM_HOST = "http://127.0.0.1:11434", LOCAL_LLM_TIMEOUT = "300" }
 ```
 
 ## Configuration
@@ -98,6 +99,16 @@ Examples:
 - Remote box on LAN: `LOCAL_LLM_HOST=http://192.168.1.50:11434`
 
 The server hits two endpoints on the host: `GET /api/tags` (model inventory) and `POST /v1/chat/completions` (inference). Any runtime exposing both works.
+
+### Request timeout
+
+Large local models (27B+ params) can take several minutes to cold-load into VRAM the first time they're called. The per-request timeout defaults to **300 seconds** and can be raised or lowered via `LOCAL_LLM_TIMEOUT` (seconds, float).
+
+| Env var | Default | Notes |
+|---------|---------|-------|
+| `LOCAL_LLM_TIMEOUT` | `300.0` | Per-call timeout for `local_chat` / `local_compare`. Bad values (empty, non-numeric, zero, negative, inf/nan) silently fall back to the default. |
+
+SDK auto-retries are disabled (`max_retries=0`) because cold-load failures are deterministic, not transient — silent retries would multiply wall-clock with no benefit.
 
 ## Smoke test
 

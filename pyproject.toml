@@ -1,6 +1,6 @@
 [project]
 name = "local-llm-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server exposing locally-hosted OSS LLMs via an OpenAI-compatible endpoint."
 requires-python = ">=3.10"
 dependencies = [
