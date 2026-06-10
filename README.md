@@ -23,9 +23,14 @@ Pairs with cloud-model MCPs like [nvidia-models-mcp](https://github.com/NAJEMWEH
 
 | Tool | Purpose |
 |------|---------|
-| `list_models` | Fetches the live model inventory from the runtime (`/api/tags`). |
-| `local_chat` | Single-model completion. Args: `model`, `prompt`, optional `system`, `max_tokens`, `temperature`. |
-| `local_compare` | Ensemble fan-out: runs the same prompt across multiple local models and returns labeled outputs. Defaults to the smallest three installed models. |
+| `list_models` | Fetches the live model inventory. Tries Ollama `/api/tags` (rich metadata), falls back to OpenAI-standard `/v1/models` — works on every runtime. |
+| `local_chat` | Single-model completion. Args: `model`, `prompt`, optional `system`, `max_tokens`, `temperature`, `host`. |
+| `local_compare` | Ensemble fan-out: runs the same prompt across multiple local models **in parallel** and returns labeled outputs. Defaults to the smallest three installed chat models (embedding models excluded). |
+| `health` | Runtime diagnostics: reachability, endpoint style (ollama/openai), model count, latency, loaded-in-VRAM models. Call this first when anything errors. |
+
+Every tool takes an optional `host` argument to query a different runtime per-call (e.g. Ollama and LM Studio in the same session) without restarting the server.
+
+Errors come back classified with a fix hint — `ERROR (connection|timeout|model-not-found|not-a-chat-model|empty-response)` — so calling agents can self-recover.
 
 ## Requirements
 
@@ -34,7 +39,7 @@ Pairs with cloud-model MCPs like [nvidia-models-mcp](https://github.com/NAJEMWEH
 - A local OpenAI-compatible runtime running. Tested with:
   - [Ollama](https://ollama.com) — default `http://127.0.0.1:11434`
   - [LM Studio](https://lmstudio.ai) — default `http://127.0.0.1:1234` (set `OLLAMA_HOST` accordingly)
-  - vLLM, llama.cpp server, text-generation-webui — any runtime exposing `/v1/chat/completions` and `/api/tags`
+  - vLLM, llama.cpp server, text-generation-webui — any runtime exposing `/v1/chat/completions` (model listing uses `/api/tags` when available, else `/v1/models`)
 
 ## Install
 
@@ -68,7 +73,7 @@ Add to `~/.claude.json` (top level):
 }
 ```
 
-Restart Claude Code. Tools appear as `mcp__local-llm__list_models`, `mcp__local-llm__local_chat`, `mcp__local-llm__local_compare`.
+Restart Claude Code. Tools appear as `mcp__local-llm__list_models`, `mcp__local-llm__local_chat`, `mcp__local-llm__local_compare`, `mcp__local-llm__health`.
 
 ### Codex CLI
 
@@ -98,7 +103,9 @@ Examples:
 - vLLM: `LOCAL_LLM_HOST=http://127.0.0.1:8000`
 - Remote box on LAN: `LOCAL_LLM_HOST=http://192.168.1.50:11434`
 
-The server hits two endpoints on the host: `GET /api/tags` (model inventory) and `POST /v1/chat/completions` (inference). Any runtime exposing both works.
+A trailing `/v1` on any host value is stripped automatically (`OPENAI_BASE_URL` conventionally includes it), so `http://localhost:1234/v1` and `http://localhost:1234` both work.
+
+The server hits `POST /v1/chat/completions` for inference. Model inventory tries `GET /api/tags` (Ollama — rich metadata) and falls back to `GET /v1/models` (OpenAI standard — names only). Any runtime exposing `/v1/chat/completions` works.
 
 ### Request timeout
 
@@ -115,10 +122,19 @@ SDK auto-retries are disabled (`max_retries=0`) because cold-load failures are d
 ```bash
 cd /path/to/local-llm-mcp
 uv sync
-uv run python -c "from server import list_models; print(list_models())"
+uv run python -c "from server import health; print(health())"
 ```
 
 The first run pulls dependencies into `.venv`. Subsequent runs reuse them.
+
+## Tests
+
+```bash
+uv run --extra test pytest           # unit tests, all HTTP mocked — no runtime needed
+uv run --extra test pytest -m live   # live smoke against your real local runtime
+```
+
+Unit tests run in CI on every push/PR. Live tests are excluded by default and meant as a pre-release check on a machine with a runtime installed.
 
 ## Multi-Agent Leader recipe (Claude + local + cloud)
 

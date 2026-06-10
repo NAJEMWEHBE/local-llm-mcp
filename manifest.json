@@ -2,9 +2,9 @@
   "manifest_version": "0.2",
   "name": "local-llm",
   "display_name": "Local OSS LLMs",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Access locally-hosted OSS LLMs (Ollama, LM Studio, vLLM, any OpenAI-compatible runtime) as MCP tools.",
-  "long_description": "Exposes whatever models the local runtime is serving (read live from /api/tags) via three tools: list_models, local_chat, and local_compare. Pairs well with cloud endpoints for a tiered workflow: small/fast local models for high-frequency mechanical tasks, big cloud models for heavy reasoning. Resolves the runtime host from LOCAL_LLM_HOST (preferred), OPENAI_BASE_URL, or OLLAMA_HOST, defaulting to http://127.0.0.1:11434 — so the same shim works against Ollama, LM Studio, vLLM, llama.cpp server, or any OpenAI-compatible local runtime.",
+  "long_description": "Exposes whatever models the local runtime is serving (read live from /api/tags, falling back to /v1/models on non-Ollama runtimes) via four tools: list_models, local_chat, local_compare, and health. Pairs well with cloud endpoints for a tiered workflow: small/fast local models for high-frequency mechanical tasks, big cloud models for heavy reasoning. Resolves the runtime host from LOCAL_LLM_HOST (preferred), OPENAI_BASE_URL, or OLLAMA_HOST, defaulting to http://127.0.0.1:11434 — so the same shim works against Ollama, LM Studio, vLLM, llama.cpp server, or any OpenAI-compatible local runtime.",
   "author": {
     "name": "NAJEMWEHBE",
     "url": "https://github.com/NAJEMWEHBE"
@@ -33,7 +33,8 @@
   "tools": [
     { "name": "list_models", "description": "List locally-installed OSS models served by the local runtime." },
     { "name": "local_chat", "description": "Single-model completion against any installed local model." },
-    { "name": "local_compare", "description": "Ensemble fan-out across multiple local models for cross-checking." }
+    { "name": "local_compare", "description": "Parallel ensemble fan-out across multiple local models for cross-checking." },
+    { "name": "health", "description": "Runtime diagnostics: reachability, endpoint style, model count, latency." }
   ],
   "keywords": ["local", "llm", "oss", "ollama", "lm-studio", "vllm", "ensemble", "openai-compatible"],
   "license": "MIT",

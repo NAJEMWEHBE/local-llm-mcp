@@ -1,12 +1,17 @@
 [project]
 name = "local-llm-mcp"
-version = "0.1.1"
+version = "0.2.0"
 description = "MCP server exposing locally-hosted OSS LLMs via an OpenAI-compatible endpoint."
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.0.0",
     "openai>=1.50.0",
     "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
 ]
 
 [build-system]
@@ -16,3 +21,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = []
 include = ["server.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: hits a real local runtime (run manually with: pytest -m live)",
+]
